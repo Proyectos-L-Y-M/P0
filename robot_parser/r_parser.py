@@ -42,10 +42,7 @@ def is_robot_command(value: str) -> bool:
     """ 
     Check if command is on robot commands group
     """
-    for v in robot_commands:
-        if v == value:
-            return True
-    return False
+    return value in robot_commands
 
 
 def parse(program: str) -> bool:
