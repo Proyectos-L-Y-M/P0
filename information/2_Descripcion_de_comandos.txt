@@ -1,0 +1,26 @@
+1. defvar -> (defvar name n) where name is a variable’s name and n is a value used initializing the variable.
+2. = 	-> (= name n) where name is a variable’s name and n is a value. The result of this instruction is to assign the value n to the variable.
+3. move -> (move n): where n is a value. The robot should move n steps forward.
+4. skip -> (skip n): where n is a value. The robot should jump n steps forward.
+5. turn 
+6. face
+7. put
+8. pick
+9. move-dir
+10. run-dirs
+11. move-face
+12. null
+--------
+
+A value is a number, a variable, or a constant.
+
+These are the constants that can be used:
+
+· Dim : the dimensions of the board
+· myXpos: the x postition of the robot
+· myYpos: the y position of the robot
+· myChips: number of chips held by the robot
+· myBalloons: number of balloons held by the robot
+· balloonsHere: number of balloons in the robot’s cell
+· ChipsHere: number of chips that can be picked
+· Spaces: number of chips that can be dropped
