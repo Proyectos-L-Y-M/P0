@@ -1,15 +1,15 @@
-1. defvar -> (defvar name n) where name is a variable’s name and n is a value used initializing the variable.
-2. = 	-> (= name n) where name is a variable’s name and n is a value. The result of this instruction is to assign the value n to the variable.
-3. move -> (move n): where n is a value. The robot should move n steps forward.
-4. skip -> (skip n): where n is a value. The robot should jump n steps forward.
-5. turn 
-6. face
-7. put
-8. pick
-9. move-dir
-10. run-dirs
-11. move-face
-12. null
+1. defvar     -> (defvar name n): where name is a variable’s name and n is a value used initializing the variable.
+2. = 	      -> (= name n): where name is a variable’s name and n is a value. The result of this instruction is to assign the value n to the variable.
+3. move       -> (move n): where n is a value. The robot should move n steps forward.
+4. skip       -> (skip n): where n is a value. The robot should jump n steps forward.
+5. turn       -> (turn D): where D can be :left, :right, or :around (defined as constants)
+6. face       -> (face O): where O can be :north, :south, :east, or :west (all constants). The robot should turn so that it ends up facing direction O.
+7. put        -> (put X n): where X corresponds to either :balloons or :chips, and n is a value. The Robot should put n X’s.
+8. pick       -> (pick X n): where X is either :balloons or :chips, and n is a value. The robot should pick n X’s.
+9. move-dir   -> (move-dir n D): where n is a value. D is one of :front, :right, :left, :back. The robot should move n positions to the front, to the left, the right or back and end up facing the same direction as it started.
+10. run-dirs  -> (run-dirs Ds): where Ds is a non-empty list of directions: :front, :right, :left, :back. The robot should move in the directions indicated by the list and end up facing the same direction as it started.
+11. move-face -> (move-face n O): here n is a value. O is :north, :south, :west, or :east. The robot should face O and then move n steps
+12. null      -> (null): a instruction that does not do anything.
 --------
 
 A value is a number, a variable, or a constant.
@@ -24,3 +24,7 @@ These are the constants that can be used:
 · balloonsHere: number of balloons in the robot’s cell
 · ChipsHere: number of chips that can be picked
 · Spaces: number of chips that can be dropped
+
+
+Preguntas:
+¿Se pueden tener paréntesis vacíos, incluso si son los params de una funcion?
