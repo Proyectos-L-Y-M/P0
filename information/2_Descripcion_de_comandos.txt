@@ -1,16 +1,55 @@
-1. defvar     -> (defvar name n): where name is a variable’s name and n is a value used initializing the variable.
-2. = 	      -> (= name n): where name is a variable’s name and n is a value. The result of this instruction is to assign the value n to the variable.
-3. move       -> (move n): where n is a value. The robot should move n steps forward.
-4. skip       -> (skip n): where n is a value. The robot should jump n steps forward.
-5. turn       -> (turn D): where D can be :left, :right, or :around (defined as constants)
-6. face       -> (face O): where O can be :north, :south, :east, or :west (all constants). The robot should turn so that it ends up facing direction O.
-7. put        -> (put X n): where X corresponds to either :balloons or :chips, and n is a value. The Robot should put n X’s.
-8. pick       -> (pick X n): where X is either :balloons or :chips, and n is a value. The robot should pick n X’s.
-9. move-dir   -> (move-dir n D): where n is a value. D is one of :front, :right, :left, :back. The robot should move n positions to the front, to the left, the right or back and end up facing the same direction as it started.
-10. run-dirs  -> (run-dirs Ds): where Ds is a non-empty list of directions: :front, :right, :left, :back. The robot should move in the directions indicated by the list and end up facing the same direction as it started.
-11. move-face -> (move-face n O): here n is a value. O is :north, :south, :west, or :east. The robot should face O and then move n steps
-12. null      -> (null): a instruction that does not do anything.
+A program for the robot is a sequence of instructions.
+------
+An instruction can be one of three things: 
+1. A command
+2. A control structure
+3. A function call
+------
+A command can be:
+1. (defvar name n): where name is a variable’s name and n is a value used initializing the variable.
+2. (= name n): where name is a variable’s name and n is a value. The result of this instruction is to assign the value n to the variable.
+3. (move n): where n is a value. The robot should move n steps forward.
+4. (skip n): where n is a value. The robot should jump n steps forward.
+5. (turn D): where D can be :left, :right, or :around (defined as constants)
+6. (face O): where O can be :north, :south, :east, or :west (all constants). The robot should turn so that it ends up facing direction O.
+7. (put X n): where X corresponds to either :balloons or :chips, and n is a value. The Robot should put n X’s.
+8. (pick X n): where X is either :balloons or :chips, and n is a value. The robot should pick n X’s.
+9. (move-dir n D): where n is a value. D is one of :front, :right, :left, :back. The robot should move n positions to the front, to the left, the right or back and end up facing the same direction as it started.
+10. (run-dirs Ds): where Ds is a non-empty list of directions: :front, :right, :left, :back. The robot should move in the directions indicated by the list and end up facing the same direction as it started.
+11. (move-face n O): here n is a value. O is :north, :south, :west, or :east. The robot should face O and then move n steps
+12. (null): a instruction that does not do anything.
 --------
+A control structure can be:
+1. Conditional: (if condition B1 B2): Executes B1 if condition is true and B2 if condition is false. B1 and B2 can be a single command or a Block
+2. Repeat: (loop condition B): Executes B while condition is true. B can be a single command or a block.
+3. RepeatTimes: (repeat n B) where n is a value. B is executed n times. B is a cingle command or a block.
+4. FunctionDefinition: (defun name (Params)Cs) where name is the function name, (Params) is a list of parameter names for the function (separated by spaces) and Cs is a sequence of commands for the function. A function is called by giving its name followed by its parameter values within parenthesis as with any other instruction, for example (funName p1 p2 p3).
+---------
+A condition can be:
+1. (facing? O) where O is one of: north, south, east, or west
+2. (blocked?) This is true if the Robot cannot move forward.
+3. (can-put? X n) where X can be chips or balloons, and n is a value.
+4. (can-pick? X n) where X can be chips or balloons, and n is a value.
+5. (can-move? D) where D is one of: :north, :south, :west, or :east
+6. (isZero? V) where V is a value.
+7. (not cond) where cond is a condition.
+---------
+Blocks are sequences of instructions delimited by parenthesis (). 
+
+Spaces, newlines, and tabulators are separators and should be ignored.
+
+The language is not case-sensitive. This is to say, it does not distinguish between upper and lower case letters.
+Remember the robot cannot walk over obstacles, and when jumping it cannot land on an obstacle.
+The robot cannot walk off the board or land off the board when jumping.
+
+
+Task 1. The task of this project is to use Python or Java to implement a simple yes/no parser.
+The program should read a text file that contains a program for the robot, and verify whether the syntax is correct.
+
+You must verify that used variable names have been previously defined and in the case of functions, that they have been previously defined and are called with valid parameter values.
+You must allow recursion.
+Spaces and tabulators are separators and should be ignored. 
+
 
 A value is a number, a variable, or a constant.
 
@@ -28,3 +67,19 @@ These are the constants that can be used:
 
 Preguntas:
 ¿Se pueden tener paréntesis vacíos, incluso si son los params de una funcion?
+
+
+---------------------------
+A command can be:
+1. defvar     -> (defvar name n): where name is a variable’s name and n is a value used initializing the variable.
+2. = 	      -> (= name n): where name is a variable’s name and n is a value. The result of this instruction is to assign the value n to the variable.
+3. move       -> (move n): where n is a value. The robot should move n steps forward.
+4. skip       -> (skip n): where n is a value. The robot should jump n steps forward.
+5. turn       -> (turn D): where D can be :left, :right, or :around (defined as constants)
+6. face       -> (face O): where O can be :north, :south, :east, or :west (all constants). The robot should turn so that it ends up facing direction O.
+7. put        -> (put X n): where X corresponds to either :balloons or :chips, and n is a value. The Robot should put n X’s.
+8. pick       -> (pick X n): where X is either :balloons or :chips, and n is a value. The robot should pick n X’s.
+9. move-dir   -> (move-dir n D): where n is a value. D is one of :front, :right, :left, :back. The robot should move n positions to the front, to the left, the right or back and end up facing the same direction as it started.
+10. run-dirs  -> (run-dirs Ds): where Ds is a non-empty list of directions: :front, :right, :left, :back. The robot should move in the directions indicated by the list and end up facing the same direction as it started.
+11. move-face -> (move-face n O): here n is a value. O is :north, :south, :west, or :east. The robot should face O and then move n steps
+12. null      -> (null): a instruction that does not do anything.
