@@ -4,22 +4,17 @@
 """
 
 
-robot_commands: list = ['move', 'turn', 'face', 'put',
-                        'pick', 'move-dir', 'run-dirs', 'move-face']
-
-flow_commands: list = ['defvar', '=', 'skip',
-                       'if', 'loop', 'repeat', 'defun']
-
 def parse_program(tokens):
-    instructions = []
-    while tokens:
-        instruction, tokens = parse_instruction(tokens)
-        instructions.append(instruction)
-    return instructions
+    success = True
+    while len(tokens) > 0 and success:
+        success = parse_instruction(tokens)
+        tokens = tokens[1:]  # Actualizar la lista de tokens, eliminando el primer token analizado
+    return success
+
 
 def parse_command(tokens):
     if not tokens:
-        return False # raise SyntaxError("Se esperaba un comando, pero se encontró el final de la entrada.")
+        return False 
     token, token_type = tokens[0]
     if token_type == 'KEYWORD':
         command_parsers = {
@@ -39,18 +34,17 @@ def parse_command(tokens):
         if token in command_parsers:
             return command_parsers[token](tokens)
         else:
-            return False #raise SyntaxError(f"Comando no reconocido: '{token}'.")
+            return False 
     else:
-        return False #raise SyntaxError(f"Token inesperado '{token}' en lugar de un comando.")
+        return False 
 
 def parse_instruction(tokens):
     # Verificar que haya al menos un token para analizar
     if not tokens:
-        return False #raise SyntaxError("No se encontraron tokens para analizar la instrucción.")
+        return False 
 
     # Obtener el tipo de la instrucción a partir del primer token
     instruction_type = tokens[0][1]
-
     instruction_parsers = {
         'defvar': parse_defvar,
         '=': parse_assignment,
@@ -69,125 +63,98 @@ def parse_instruction(tokens):
         'repeat': parse_repeat,
         'defun': parse_function_definition,
     }
-    
     if instruction_type in instruction_parsers:
         return instruction_parsers[instruction_type](tokens[1:])
     else:
-        return False #raise SyntaxError(f"Tipo de instrucción desconocido: {instruction_type}")
-
+        return False 
+    
 def parse_value(tokens):
     # Comprobar que hay tokens para analizar
     if not tokens:
-        raise SyntaxError("Se esperaba un valor, pero se encontró el final de la entrada.")
+        return False 
     
     token, token_type = tokens[0]
     if token_type == 'NUMBER':
-        # Si el primer token es un número, retornamos su valor
-        return {
-            'type': 'number',
-            'value': int(token)
-        }
+        return True 
     elif token_type == 'IDENTIFIER':
         # Si el primer token es un identificador, retornamos su valor
-        return {
-            'type': 'identifier',
-            'name': token
-        }
+        return True
     elif token_type == 'CONSTANT':
         # Si el primer token es una constante, retornamos su valor
-        return {
-            'type': 'constant',
-            'name': token
-        }
+        return True 
     else:
-        return False #raise SyntaxError(f"Token inesperado '{token}' al analizar un valor.")
+        return False
 
 def parse_defvar(tokens):
     if len(tokens) < 4:
-        raise SyntaxError("Comando 'defvar' incompleto.")
-    
+        return False 
     if tokens[1][1] != 'IDENTIFIER':
-        raise SyntaxError("Se esperaba un identificador después de 'defvar'.")
-    
+        return False
     if tokens[2][0] != '=':
-        raise SyntaxError("Se esperaba un signo '=' después del nombre de la variable en 'defvar'.")
-    
-    # Analizar el valor de la variable (puede ser un número, una variable o una constante)
-    value = parse_value(tokens[3:])
-    
-    # Devolver una representación del comando 'defvar'
-    return {'command': 'defvar', 'variable': tokens[1][0], 'value': value}
+        return False 
+    return True
 
 def parse_assignment(tokens):
     if len(tokens) < 3:
-        raise SyntaxError("Comando de asignación incompleto.")
+        return False 
     
     if tokens[1][1] != 'IDENTIFIER':
-        raise SyntaxError("Se esperaba un identificador después del signo '=' en la asignación.")
-    
-    # Analizar el valor asignado (puede ser un número, una variable o unax constante)
-    value = parse_value(tokens[2:])
-    
-    # Devolver una representación del comando de asignación
-    return {'command': 'assignment', 'variable': tokens[1][0], 'value': value}
+        return False 
+   
+    return True 
 
 def parse_move(tokens):
     if len(tokens) < 2:
-        raise SyntaxError("Comando 'move' incompleto.")
+        return False # SyntaxError("Comando 'move' incompleto.")
     
     if tokens[1][1] != 'NUMBER':
-        raise SyntaxError("Se esperaba un número después de 'move'.")
+        return False # SyntaxError("Se esperaba un número después de 'move'.")
     
     # Obtener el número de pasos a mover
     steps = int(tokens[1][0])
     
     # Devolver una representación del comando 'move'
-    return {'command': 'move', 'steps': steps}
+    return True #'command': 'move', 'steps': steps}
 
 def parse_skip(tokens):
     # Comprobar que hay suficientes tokens para analizar el comando skip
     if len(tokens) < 2:
-        raise SyntaxError("Comando 'skip' incompleto.")
+        return False # SyntaxError("Comando 'skip' incompleto.")
 
     # Verificar el formato del comando skip
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'skip':
-        raise SyntaxError("Se esperaba el comando 'skip'.")
+        return False # SyntaxError("Se esperaba el comando 'skip'.")
     if tokens[1][0] != 'NUMBER':
-        raise SyntaxError("Se esperaba un número después de 'skip'.")
+        return False # SyntaxError("Se esperaba un número después de 'skip'.")
 
     # Devolver una estructura de datos que represente el comando skip
-    return {
-        'type': 'skip',
-        'steps': int(tokens[1][0])  # El número de pasos a saltar
-    }
+    return True #
+       
 
 def parse_skip(tokens):
     # Comprobar que hay suficientes tokens para analizar el comando skip
     if len(tokens) < 2:
-        raise SyntaxError("Comando 'skip' incompleto.")
+        return False # SyntaxError("Comando 'skip' incompleto.")
 
     # Verificar el formato del comando skip
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'skip':
-        raise SyntaxError("Se esperaba el comando 'skip'.")
+        return False # SyntaxError("Se esperaba el comando 'skip'.")
     if tokens[1][0] != 'NUMBER':
-        raise SyntaxError("Se esperaba un número después de 'skip'.")
+        return False # SyntaxError("Se esperaba un número después de 'skip'.")
 
     # Devolver una estructura de datos que represente el comando skip
-    return {
-        'type': 'skip',
-        'steps': int(tokens[1][0])  # El número de pasos a saltar
-    }
+    return True #
  
 def parse_turn(tokens):
     # Comprobar que hay suficientes tokens para analizar el comando turn
     if len(tokens) < 2:
-        raise SyntaxError("Comando 'turn' incompleto.")
+        return False # SyntaxError("Comando 'turn' incompleto.")
 
     # Verificar el formato del comando turn
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'turn':
-        raise SyntaxError("Se esperaba el comando 'turn'.")
+        return False # SyntaxError("Se esperaba el comando 'turn'.")
     if tokens[1][0] != 'SYMBOL':
-        raise SyntaxError("Se esperaba una dirección después de 'turn'.")
+        return False # SyntaxError("Se esperaba una dirección después de 'turn'.")
 
     # Mapear las direcciones de giro a constantes definidas en el lenguaje
     directions = {
@@ -198,24 +165,22 @@ def parse_turn(tokens):
 
     # Comprobar si la dirección es válida
     if tokens[1][1] not in directions:
-        raise SyntaxError("Dirección de giro no válida.")
+        return False # SyntaxError("Dirección de giro no válida.")
 
     # Devolver una estructura de datos que represente el comando turn
-    return {
-        'type': 'turn',
-        'direction': directions[tokens[1][0]]  # La dirección hacia la que girar
-    }
+    return True #
+       
 
 def parse_face(tokens):
     # Comprobar que hay suficientes tokens para analizar el comando face
     if len(tokens) < 2:
-        raise SyntaxError("Comando 'face' incompleto.")
+        return False # SyntaxError("Comando 'face' incompleto.")
 
     # Verificar el formato del comando face
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'face':
-        raise SyntaxError("Se esperaba el comando 'face'.")
+        return False # SyntaxError("Se esperaba el comando 'face'.")
     if tokens[1][0] != 'SYMBOL':
-        raise SyntaxError("Se esperaba una dirección después de 'face'.")
+        return False # SyntaxError("Se esperaba una dirección después de 'face'.")
 
     # Mapear las direcciones de orientación a constantes definidas en el lenguaje
     directions = {
@@ -227,26 +192,24 @@ def parse_face(tokens):
 
     # Comprobar si la dirección es válida
     if tokens[1][1] not in directions:
-        raise SyntaxError("Dirección de orientación no válida.")
+        return False # SyntaxError("Dirección de orientación no válida.")
 
     # Devolver una estructura de datos que represente el comando face
-    return {
-        'type': 'face',
-        'direction': directions[tokens[1][0]]  # La dirección hacia la que orientarse
-    }
+    return True #
+       
 
 def parse_put(tokens):
     # Comprobar que hay suficientes tokens para analizar el comando put
     if len(tokens) < 3:
-        raise SyntaxError("Comando 'put' incompleto.")
+        return False # SyntaxError("Comando 'put' incompleto.")
 
     # Verificar el formato del comando put
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'put':
-        raise SyntaxError("Se esperaba el comando 'put'.")
+        return False # SyntaxError("Se esperaba el comando 'put'.")
     if tokens[1][0] != 'SYMBOL':
-        raise SyntaxError("Se esperaba un tipo de objeto después de 'put'.")
+        return False # SyntaxError("Se esperaba un tipo de objeto después de 'put'.")
     if tokens[2][0] != 'NUMBER':
-        raise SyntaxError("Se esperaba un número después del tipo de objeto en 'put'.")
+        return False # SyntaxError("Se esperaba un número después del tipo de objeto en 'put'.")
 
     # Mapear los tipos de objeto a constantes definidas en el lenguaje
     object_types = {
@@ -256,27 +219,24 @@ def parse_put(tokens):
 
     # Comprobar si el tipo de objeto es válido
     if tokens[1][1] not in object_types:
-        raise SyntaxError("Tipo de objeto no válido en 'put'.")
+        return False # SyntaxError("Tipo de objeto no válido en 'put'.")
 
     # Devolver una estructura de datos que represente el comando put
-    return {
-        'type': 'put',
-        'object_type': object_types[tokens[1][0]],  # El tipo de objeto
-        'amount': int(tokens[2][0])  # La cantidad de objetos a colocar
-    }
+    return True #
+       
 
 def parse_pick(tokens):
     # Comprobar que hay suficientes tokens para analizar el comando pick
     if len(tokens) < 3:
-        raise SyntaxError("Comando 'pick' incompleto.")
+        return False # SyntaxError("Comando 'pick' incompleto.")
 
     # Verificar el formato del comando pick
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'pick':
-        raise SyntaxError("Se esperaba el comando 'pick'.")
+        return False # SyntaxError("Se esperaba el comando 'pick'.")
     if tokens[1][0] != 'SYMBOL':
-        raise SyntaxError("Se esperaba un tipo de objeto después de 'pick'.")
+        return False # SyntaxError("Se esperaba un tipo de objeto después de 'pick'.")
     if tokens[2][0] != 'NUMBER':
-        raise SyntaxError("Se esperaba un número después del tipo de objeto en 'pick'.")
+        return False # SyntaxError("Se esperaba un número después del tipo de objeto en 'pick'.")
 
     # Mapear los tipos de objeto a constantes definidas en el lenguaje
     object_types = {
@@ -286,27 +246,24 @@ def parse_pick(tokens):
 
     # Comprobar si el tipo de objeto es válido
     if tokens[1][1] not in object_types:
-        raise SyntaxError("Tipo de objeto no válido en 'pick'.")
+        return False # SyntaxError("Tipo de objeto no válido en 'pick'.")
 
     # Devolver una estructura de datos que represente el comando pick
-    return {
-        'type': 'pick',
-        'object_type': object_types[tokens[1][0]],  # El tipo de objeto
-        'amount': int(tokens[2][0])  # La cantidad de objetos a recoger
-    }
+    return True #
+     
 
 def parse_move_dir(tokens):
     # Comprobar que hay suficientes tokens para analizar el comando move-dir
     if len(tokens) < 3:
-        raise SyntaxError("Comando 'move-dir' incompleto.")
+        return False # SyntaxError("Comando 'move-dir' incompleto.")
 
     # Verificar el formato del comando move-dir
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'move-dir':
-        raise SyntaxError("Se esperaba el comando 'move-dir'.")
+        return False # SyntaxError("Se esperaba el comando 'move-dir'.")
     if tokens[1][0] != 'NUMBER':
-        raise SyntaxError("Se esperaba un número después de 'move-dir'.")
+        return False # SyntaxError("Se esperaba un número después de 'move-dir'.")
     if tokens[2][0] != 'SYMBOL':
-        raise SyntaxError("Se esperaba una dirección después del número en 'move-dir'.")
+        return False # SyntaxError("Se esperaba una dirección después del número en 'move-dir'.")
 
     # Mapear las direcciones de movimiento a constantes definidas en el lenguaje
     directions = {
@@ -318,27 +275,24 @@ def parse_move_dir(tokens):
 
     # Comprobar si la dirección es válida
     if tokens[2][1] not in directions:
-        raise SyntaxError("Dirección de movimiento no válida en 'move-dir'.")
+        return False # SyntaxError("Dirección de movimiento no válida en 'move-dir'.")
 
     # Devolver una estructura de datos que represente el comando move-dir
-    return {
-        'type': 'move-dir',
-        'steps': int(tokens[1][0]),  # El número de pasos a mover
-        'direction': directions[tokens[2][0]]  # La dirección hacia la que moverse
-    }
+    return True #
+      
 
 def parse_move_face(tokens):
     # Comprobar que hay suficientes tokens para analizar el comando move-face
     if len(tokens) != 3:
-        raise SyntaxError("Comando 'move-face' incompleto.")
+        return False # SyntaxError("Comando 'move-face' incompleto.")
 
     # Verificar el formato del comando move-face
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'move-face':
-        raise SyntaxError("Se esperaba el comando 'move-face'.")
+        return False # SyntaxError("Se esperaba el comando 'move-face'.")
     if tokens[1][0] != 'NUMBER':
-        raise SyntaxError("Se esperaba un número después de 'move-face'.")
+        return False # SyntaxError("Se esperaba un número después de 'move-face'.")
     if tokens[2][0] != 'SYMBOL':
-        raise SyntaxError("Se esperaba una dirección después del número en 'move-face'.")
+        return False # SyntaxError("Se esperaba una dirección después del número en 'move-face'.")
 
     # Mapear las direcciones de orientación a constantes definidas en el lenguaje
     directions = {
@@ -350,25 +304,21 @@ def parse_move_face(tokens):
 
     # Comprobar si la dirección es válida
     if tokens[2][1] not in directions:
-        raise SyntaxError("Dirección de orientación no válida en 'move-face'.")
+        return False # SyntaxError("Dirección de orientación no válida en 'move-face'.")
 
     # Devolver una estructura de datos que represente el comando move-face
-    return {
-        'type': 'move-face',
-        'steps': int(tokens[1][0]),  # El número de pasos a mover
-        'direction': directions[tokens[2][0]]  # La dirección hacia la que orientarse
-    }
-
+    return True #
+  
 def parse_run_dirs(tokens):
     # Comprobar que hay suficientes tokens para analizar el comando run-dirs
     if len(tokens) < 2:
-        raise SyntaxError("Comando 'run-dirs' incompleto.")
+        return False # SyntaxError("Comando 'run-dirs' incompleto.")
 
     # Verificar el formato del comando run-dirs
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'run-dirs':
-        raise SyntaxError("Se esperaba el comando 'run-dirs'.")
+        return False # SyntaxError("Se esperaba el comando 'run-dirs'.")
     if tokens[1][0] != 'LPAREN':
-        raise SyntaxError("Se esperaba una lista de direcciones después de 'run-dirs'.")
+        return False # SyntaxError("Se esperaba una lista de direcciones después de 'run-dirs'.")
 
     # Inicializar la lista de direcciones
     directions = []
@@ -379,14 +329,14 @@ def parse_run_dirs(tokens):
         if tokens[index][0] == 'RPAREN':
             break
         elif tokens[index][0] != 'SYMBOL':
-            raise SyntaxError("Se esperaba una dirección en la lista de direcciones.")
+            return False # SyntaxError("Se esperaba una dirección en la lista de direcciones.")
         else:
             directions.append(tokens[index][1])
         index += 1
 
     # Comprobar si la lista de direcciones está vacía
     if not directions:
-        raise SyntaxError("Lista de direcciones vacía en 'run-dirs'.")
+        return False # SyntaxError("Lista de direcciones vacía en 'run-dirs'.")
 
     # Mapear las direcciones de movimiento a constantes definidas en el lenguaje
     valid_directions = {
@@ -399,21 +349,19 @@ def parse_run_dirs(tokens):
     # Verificar si todas las direcciones en la lista son válidas
     for direction in directions:
         if direction not in valid_directions:
-            raise SyntaxError("Dirección de movimiento no válida en 'run-dirs'.")
+            return False # SyntaxError("Dirección de movimiento no válida en 'run-dirs'.")
 
     # Devolver una estructura de datos que represente el comando run-dirs
-    return {
-        'type': 'run-dirs',
-        'directions': [valid_directions[dir] for dir in directions]
-    }
+    return True #
+   
 
 def parse_null(tokens):
     # Verificar que el comando null esté bien formado
     if len(tokens) != 1 or tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'null':
-        raise SyntaxError("Comando 'null' mal formado.")
+        return False # SyntaxError("Comando 'null' mal formado.")
 
     # Devolver una estructura de datos que represente el comando null
-    return {
+    return True #
         'type': 'null'
     }
 
@@ -422,7 +370,7 @@ def parse_null(tokens):
 def parse_block(tokens):
     # Verificar que los tokens estén delimitados correctamente por paréntesis
     if tokens[0][0] != 'LPAREN' or tokens[-1][0] != 'RPAREN':
-        raise SyntaxError("El bloque de instrucciones debe estar delimitado por paréntesis.")
+        return False # SyntaxError("El bloque de instrucciones debe estar delimitado por paréntesis.")
 
     # Remover los paréntesis que delimitan el bloque
     inner_tokens = tokens[1:-1]
@@ -444,7 +392,7 @@ def parse_block(tokens):
 
         # Si no se encuentra ningún token que indique el final de una instrucción, hay un error de sintaxis
         if end_index is None:
-            raise SyntaxError("Símbolo de paréntesis de cierre faltante.")
+            return False # SyntaxError("Símbolo de paréntesis de cierre faltante.")
 
         # Extraer los tokens que representan una instrucción y eliminarlos del bloque
         instruction_tokens = inner_tokens[start_index:start_index + end_index + 1]
@@ -460,129 +408,114 @@ def parse_block(tokens):
 def parse_blocked_condition(tokens):
     # Comprobar que hay suficientes tokens para analizar la condición blocked?
     if len(tokens) != 2:
-        raise SyntaxError("Condición 'blocked?' incompleta.")
+        return False # SyntaxError("Condición 'blocked?' incompleta.")
 
     # Verificar el formato de la condición blocked?
     if tokens[0][0] != 'LPAREN' or tokens[1][0] != 'KEYWORD' or tokens[1][1] != 'blocked?':
-        raise SyntaxError("Formato incorrecto de la condición 'blocked?'.")
+        return False # SyntaxError("Formato incorrecto de la condición 'blocked?'.")
 
     # Devolver una estructura de datos que represente la condición blocked?
-    return {
-        'type': 'blocked?'
-    }
+    return True #
+        
 
 def parse_can_put_condition(tokens):
     # Comprobar que hay suficientes tokens para analizar la condición can-put?
     if len(tokens) != 4:
-        raise SyntaxError("Condición 'can-put?' incompleta.")
+        return False # SyntaxError("Condición 'can-put?' incompleta.")
 
     # Verificar el formato de la condición can-put?
     if tokens[0][0] != 'LPAREN' or tokens[1][0] != 'KEYWORD' or tokens[1][1] != 'can-put?':
-        raise SyntaxError("Formato incorrecto de la condición 'can-put?'.")
+        return False # SyntaxError("Formato incorrecto de la condición 'can-put?'.")
 
     # Verificar que el tipo de objeto a colocar sea válido
     if tokens[2][0] != 'SYMBOL' or tokens[2][1] not in (':chips', ':balloons'):
-        raise SyntaxError("Tipo de objeto no válido en la condición 'can-put?'.")
+        return False # SyntaxError("Tipo de objeto no válido en la condición 'can-put?'.")
 
     # Verificar que el número sea un valor numérico
     if tokens[3][0] != 'NUMBER':
-        raise SyntaxError("Valor numérico esperado en la condición 'can-put?'.")
+        return False # SyntaxError("Valor numérico esperado en la condición 'can-put?'.")
 
     # Devolver una estructura de datos que represente la condición can-put?
-    return {
-        'type': 'can-put?',
-        'object_type': tokens[2][1],
-        'number': int(tokens[3][1])
-    }
+    return True #
+      
 
 def parse_can_pick_condition(tokens):
     # Comprobar que hay suficientes tokens para analizar la condición can-pick?
     if len(tokens) != 4:
-        raise SyntaxError("Condición 'can-pick?' incompleta.")
+        return False # SyntaxError("Condición 'can-pick?' incompleta.")
 
     # Verificar el formato de la condición can-pick?
     if tokens[0][0] != 'LPAREN' or tokens[1][0] != 'KEYWORD' or tokens[1][1] != 'can-pick?':
-        raise SyntaxError("Formato incorrecto de la condición 'can-pick?'.")
+        return False # SyntaxError("Formato incorrecto de la condición 'can-pick?'.")
 
     # Verificar que el tipo de objeto a recoger sea válido
     if tokens[2][0] != 'SYMBOL' or tokens[2][1] not in (':chips', ':balloons'):
-        raise SyntaxError("Tipo de objeto no válido en la condición 'can-pick?'.")
+        return False # SyntaxError("Tipo de objeto no válido en la condición 'can-pick?'.")
 
     # Verificar que el número sea un valor numérico
     if tokens[3][0] != 'NUMBER':
-        raise SyntaxError("Valor numérico esperado en la condición 'can-pick?'.")
+        return False # SyntaxError("Valor numérico esperado en la condición 'can-pick?'.")
 
     # Devolver una estructura de datos que represente la condición can-pick?
-    return {
-        'type': 'can-pick?',
-        'object_type': tokens[2][1],
-        'number': int(tokens[3][1])
-    }
+    return True #
+   
 
 def parse_can_move_condition(tokens):
     # Comprobar que hay suficientes tokens para analizar la condición can-move?
     if len(tokens) != 3:
-        raise SyntaxError("Condición 'can-move?' incompleta.")
+        return False # SyntaxError("Condición 'can-move?' incompleta.")
 
     # Verificar el formato de la condición can-move?
     if tokens[0][0] != 'LPAREN' or tokens[1][0] != 'KEYWORD' or tokens[1][1] != 'can-move?':
-        raise SyntaxError("Formato incorrecto de la condición 'can-move?'.")
+        return False # SyntaxError("Formato incorrecto de la condición 'can-move?'.")
 
     # Verificar que la dirección sea válida
     if tokens[2][0] != 'SYMBOL' or tokens[2][1] not in (':north', ':south', ':east', ':west'):
-        raise SyntaxError("Dirección no válida en la condición 'can-move?'.")
+        return False # SyntaxError("Dirección no válida en la condición 'can-move?'.")
 
     # Devolver una estructura de datos que represente la condición can-move?
-    return {
-        'type': 'can-move?',
-        'direction': tokens[2][1]
-    }
-
+    return True #
+  
 def parse_is_zero_condition(tokens):
     # Comprobar que hay suficientes tokens para analizar la condición isZero?
     if len(tokens) != 3:
-        raise SyntaxError("Condición 'isZero?' incompleta.")
+        return False # SyntaxError("Condición 'isZero?' incompleta.")
 
     # Verificar el formato de la condición isZero?
     if tokens[0][0] != 'LPAREN' or tokens[1][0] != 'KEYWORD' or tokens[1][1] != 'isZero?':
-        raise SyntaxError("Formato incorrecto de la condición 'isZero?'.")
+        return False # SyntaxError("Formato incorrecto de la condición 'isZero?'.")
 
     # Verificar que el valor sea un número
     if tokens[2][0] != 'NUMBER':
-        raise SyntaxError("Valor numérico esperado en la condición 'isZero?'.")
+        return False # SyntaxError("Valor numérico esperado en la condición 'isZero?'.")
 
     # Devolver una estructura de datos que represente la condición isZero?
-    return {
-        'type': 'isZero?',
-        'value': int(tokens[2][1])
-    }
-
+    return True #
+  
 def parse_not_condition(tokens):
     # Comprobar que hay suficientes tokens para analizar la condición not
     if len(tokens) != 3:
-        raise SyntaxError("Condición 'not' incompleta.")
+        return False # SyntaxError("Condición 'not' incompleta.")
 
     # Verificar el formato de la condición not
     if tokens[0][0] != 'LPAREN' or tokens[1][0] != 'KEYWORD' or tokens[1][1] != 'not':
-        raise SyntaxError("Formato incorrecto de la condición 'not'.")
+        return False # SyntaxError("Formato incorrecto de la condición 'not'.")
 
     # Analizar la subcondición
     subcondition = parse_condition(tokens[2:])
 
     # Devolver una estructura de datos que represente la condición not
-    return {
-        'type': 'not',
-        'condition': subcondition
-    }
+    return True #
+
 
 def parse_condition(tokens):
     # Comprobar que hay suficientes tokens para analizar la condición
     if len(tokens) < 2:
-        raise SyntaxError("Condición incompleta.")
+        return False # SyntaxError("Condición incompleta.")
 
     # Verificar el formato de la condición
     if tokens[0][0] != 'LPAREN' or tokens[-1][0] != 'RPAREN':
-        raise SyntaxError("Símbolos de paréntesis faltantes en la condición.")
+        return False # SyntaxError("Símbolos de paréntesis faltantes en la condición.")
 
     # Analizar la condición basada en el tipo de condición
     if tokens[1][0] == 'KEYWORD':
@@ -601,38 +534,36 @@ def parse_condition(tokens):
         elif tokens[1][1] == 'not':
             return parse_not_condition(tokens)
         else:
-            raise SyntaxError("Condición no válida.")
+            return False # SyntaxError("Condición no válida.")
     else:
-        raise SyntaxError("Condición no válida.")
+        return False # SyntaxError("Condición no válida.")
 
 def parse_facing_condition(tokens):
     # Comprobar que hay suficientes tokens para analizar la condición
     if len(tokens) != 3:
-        raise SyntaxError("Condición 'facing?' incompleta.")
+        return False # SyntaxError("Condición 'facing?' incompleta.")
 
     # Verificar el formato de la condición 'facing?'
     if tokens[0][0] != 'LPAREN' or tokens[1][0] != 'KEYWORD':
-        raise SyntaxError("Formato incorrecto de la condición 'facing?'.")
+        return False # SyntaxError("Formato incorrecto de la condición 'facing?'.")
     if tokens[2][0] != 'SYMBOL' or tokens[2][1] not in (':north', ':south', ':east', ':west'):
-        raise SyntaxError("Dirección de orientación no válida en la condición 'facing?'.")
+        return False # SyntaxError("Dirección de orientación no válida en la condición 'facing?'.")
 
     # Devolver una estructura de datos que represente la condición 'facing?'
-    return {
-        'type': 'facing?',
-        'direction': tokens[2][1]
-    }
+    return True #
+
 
 def parse_if(tokens):
     # Comprobar que hay suficientes tokens para analizar la estructura if
     if len(tokens) < 4:
-        raise SyntaxError("Estructura 'if' incompleta.")
+        return False # SyntaxError("Estructura 'if' incompleta.")
 
     # Verificar el formato de la estructura if
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'if':
-        raise SyntaxError("Se esperaba la palabra clave 'if'.")
+        return False # SyntaxError("Se esperaba la palabra clave 'if'.")
     condition = parse_condition(tokens[1])
     if tokens[2][0] != 'LPAREN' or tokens[-1][0] != 'RPAREN':
-        raise SyntaxError("Símbolos de paréntesis faltantes.")
+        return False # SyntaxError("Símbolos de paréntesis faltantes.")
     
     # Obtener los bloques de instrucciones para el caso verdadero y el caso falso
     true_block_tokens = []
@@ -647,22 +578,22 @@ def parse_if(tokens):
             elif false_block_started:
                 false_block_tokens.append(token)
             else:
-                raise SyntaxError("Símbolo de paréntesis inesperado.")
+                return False # SyntaxError("Símbolo de paréntesis inesperado.")
         elif token[0] == 'RPAREN':
             if true_block_started:
                 true_block_tokens.append(token)
             elif false_block_started:
                 false_block_tokens.append(token)
             else:
-                raise SyntaxError("Símbolo de paréntesis inesperado.")
+                return False # SyntaxError("Símbolo de paréntesis inesperado.")
         elif token[0] == 'KEYWORD' and token[1] == 'if':
-            raise SyntaxError("Las estructuras de control no están permitidas dentro de un bloque if.")
+            return False # SyntaxError("Las estructuras de control no están permitidas dentro de un bloque if.")
         elif token[0] == 'KEYWORD' and token[1] == 'else':
             if true_block_started:
                 true_block_started = False
                 false_block_started = True
             else:
-                raise SyntaxError("Palabra clave 'else' inesperada.")
+                return False # SyntaxError("Palabra clave 'else' inesperada.")
         else:
             if true_block_started:
                 true_block_tokens.append(token)
@@ -674,23 +605,19 @@ def parse_if(tokens):
     false_block = parse_block(false_block_tokens)
 
     # Devolver una estructura de datos que represente la estructura if
-    return {
-        'type': 'if',
-        'condition': condition,
-        'true_block': true_block,
-        'false_block': false_block
-    }
+    return True #
+
 
 def parse_loop(tokens):
     # Comprobar que hay suficientes tokens para analizar la estructura loop
     if len(tokens) < 3:
-        raise SyntaxError("Estructura 'loop' incompleta.")
+        return False # SyntaxError("Estructura 'loop' incompleta.")
 
     # Verificar el formato de la estructura loop
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'loop':
-        raise SyntaxError("Se esperaba el comando 'loop'.")
+        return False # SyntaxError("Se esperaba el comando 'loop'.")
     if tokens[1][0] != 'LPAREN' or tokens[-1][0] != 'RPAREN':
-        raise SyntaxError("Símbolos de paréntesis faltantes.")
+        return False # SyntaxError("Símbolos de paréntesis faltantes.")
 
     # Obtener los tokens dentro del bloque de instrucciones del loop
     inner_tokens = tokens[2:-1]
@@ -699,23 +626,21 @@ def parse_loop(tokens):
     loop_block = parse_block(inner_tokens)
 
     # Devolver una estructura de datos que represente la estructura loop
-    return {
-        'type': 'loop',
-        'block': loop_block
-    }
+    return True #
+ 
 
 def parse_repeat(tokens):
     # Comprobar que hay suficientes tokens para analizar la estructura repeat
     if len(tokens) < 4:
-        raise SyntaxError("Estructura 'repeat' incompleta.")
+        return False # SyntaxError("Estructura 'repeat' incompleta.")
 
     # Verificar el formato de la estructura repeat
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'repeat':
-        raise SyntaxError("Se esperaba el comando 'repeat'.")
+        return False # SyntaxError("Se esperaba el comando 'repeat'.")
     if tokens[1][0] != 'NUMBER':
-        raise SyntaxError("Se esperaba un número después de 'repeat'.")
+        return False # SyntaxError("Se esperaba un número después de 'repeat'.")
     if tokens[2][0] != 'LPAREN' or tokens[-1][0] != 'RPAREN':
-        raise SyntaxError("Símbolos de paréntesis faltantes.")
+        return False # SyntaxError("Símbolos de paréntesis faltantes.")
 
     # Obtener el número de repeticiones
     repetitions = int(tokens[1][1])
@@ -727,26 +652,22 @@ def parse_repeat(tokens):
     repeat_block = parse_block(inner_tokens)
 
     # Devolver una estructura de datos que represente la estructura repeat
-    return {
-        'type': 'repeat',
-        'repetitions': repetitions,
-        'block': repeat_block
-    }
+    return True #
 
 def parse_function_definition(tokens):
     # Comprobar que hay suficientes tokens para analizar la definición de función
     if len(tokens) < 5:
-        raise SyntaxError("Definición de función incompleta.")
+        return False # SyntaxError("Definición de función incompleta.")
 
     # Verificar el formato de la definición de función
     if tokens[0][0] != 'KEYWORD' or tokens[0][1] != 'defun':
-        raise SyntaxError("Se esperaba el comando 'defun'.")
+        return False # SyntaxError("Se esperaba el comando 'defun'.")
     if tokens[1][0] != 'SYMBOL':
-        raise SyntaxError("Se esperaba el nombre de la función después de 'defun'.")
+        return False # SyntaxError("Se esperaba el nombre de la función después de 'defun'.")
     if tokens[2][0] != 'LPAREN':
-        raise SyntaxError("Símbolo de paréntesis de apertura faltante.")
+        return False # SyntaxError("Símbolo de paréntesis de apertura faltante.")
     if tokens[-2][0] != 'RPAREN' or tokens[-1][0] != 'RPAREN':
-        raise SyntaxError("Símbolos de paréntesis de cierre faltantes.")
+        return False # SyntaxError("Símbolos de paréntesis de cierre faltantes.")
 
     # Obtener el nombre de la función
     function_name = tokens[1][1]
@@ -761,18 +682,13 @@ def parse_function_definition(tokens):
     function_block = parse_block(inner_tokens)
 
     # Devolver una estructura de datos que represente la definición de función
-    return {
-        'type': 'function_definition',
-        'name': function_name,
-        'parameters': parameters,
-        'block': function_block
-    }
+    return True #
 
 # Función para analizar estructuras de control
 def parse_control_structure(tokens):
     # Comprobar que hay suficientes tokens para analizar la estructura de control
     if not tokens:
-        raise SyntaxError("Se esperaba una estructura de control, pero se encontró el final de la entrada.")
+        return False # SyntaxError("Se esperaba una estructura de control, pero se encontró el final de la entrada.")
 
     # Obtener el tipo de estructura de control
     control_type = tokens[0][1]
@@ -787,7 +703,7 @@ def parse_control_structure(tokens):
     elif control_type == 'defun':
         return parse_function_definition(tokens[1:])
     else:
-        raise SyntaxError(f"Estructura de control no válida: {control_type}")
+        return False # SyntaxError(f"Estructura de control no válida: {control_type}")
 
 
 # Función para analizar llamados a funciones
@@ -795,7 +711,7 @@ def parse_control_structure(tokens):
 def parse_argument(tokens):
     # Verificar que hay suficientes tokens para analizar un argumento
     if len(tokens) < 1:
-        raise SyntaxError("Argumento incompleto.")
+        return False # SyntaxError("Argumento incompleto.")
 
     # Verificar el tipo del token y devolver el argumento
     if tokens[0][0] == 'NUMBER':
@@ -803,16 +719,16 @@ def parse_argument(tokens):
     elif tokens[0][0] == 'SYMBOL':
         return tokens[0][1], tokens[1:]
     else:
-        raise SyntaxError("Tipo de argumento no válido.")
+        return False # SyntaxError("Tipo de argumento no válido.")
 
 def parse_function_call(tokens):
     # Comprobar que hay suficientes tokens para analizar la llamada a una función
     if len(tokens) < 2 or tokens[0][0] != 'LPAREN':
-        raise SyntaxError("Llamada a función incompleta o incorrecta.")
+        return False # SyntaxError("Llamada a función incompleta o incorrecta.")
 
     # Verificar que el primer token sea un paréntesis de apertura y el segundo sea el nombre de la función
     if tokens[0][0] != 'LPAREN' or tokens[1][0] != 'SYMBOL':
-        raise SyntaxError("Formato incorrecto de la llamada a función.")
+        return False # SyntaxError("Formato incorrecto de la llamada a función.")
 
     # Obtener el nombre de la función
     function_name = tokens[1][1]
@@ -828,14 +744,9 @@ def parse_function_call(tokens):
 
     # Verificar el cierre del paréntesis
     if tokens[-1][0] != 'RPAREN':
-        raise SyntaxError("Falta el paréntesis de cierre en la llamada a función.")
+        return False # SyntaxError("Falta el paréntesis de cierre en la llamada a función.")
 
     # Devolver una estructura de datos que represente la llamada a la función
-    return {
-        'type': 'function_call',
-        'name': function_name,
-        'args': args
-    }
-
-
+    return True #
+ 
 
